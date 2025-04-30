@@ -390,19 +390,25 @@ const renderAircraft = (
   )}
 </Section>
 
-      <Section title={`Local IR (${localIR.length})`}>
-        {renderAircraft(localIR, [{ label: "Joining Visual Circuit", onClick: moveToVisualCircuitFromLocalIR }])}
-      </Section>
+<div style={{ display: "flex", width: "100%", marginBottom: "25px" }}>
+  <div style={{ flex: 1, marginRight: "10px" }}>
+    <Section title="Local IR">
+      {renderAircraft(localIR, [{ label: "Joining Visual Circuit", onClick: moveToVisualCircuitFromLocalIR }])}
+    </Section>
+  </div>
 
-      <Section title="Training Box">
-        {renderAircraft(
-          Object.keys(trainingBox),
-          [
-            { label: "Joining Visual Circuit", onClick: moveToVisualFromTrainingBox },
-            { label: "Proceed to Cross Country", onClick: moveToCrossCountry }
-          ]
-        )}
-      </Section>
+  <div style={{ flex: 1, marginLeft: "10px" }}>
+    <Section title="Training Box">
+      {renderAircraft(
+        Object.keys(trainingBox),
+        [
+          { label: "Joining Visual Circuit", onClick: moveToVisualFromTrainingBox },
+          { label: "Proceed to Cross Country", onClick: moveToCrossCountry }
+        ]
+      )}
+    </Section>
+  </div>
+</div>
 
       <Section title={`Visual Circuit (${visualCircuit.length})`}>
         {renderAircraft(visualCircuit, [
