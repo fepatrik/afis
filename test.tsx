@@ -56,6 +56,18 @@ const moveBackToTaxiing = (reg: string) => {
   }));
 };
 
+const moveToTaxiingFromLocalIR = (reg: string) => {
+  setLocalIR(localIR.filter((r) => r !== reg));
+  setTaxiing([...taxiing, reg]);
+  setTimestamps((prev) => ({
+    ...prev,
+    [reg]: {
+      ...prev[reg],
+      landed: getCurrentTime(),
+    }
+  }));
+};
+
 const moveToTaxiingFromVisual = (reg: string) => {
   setVisualCircuit((prev) => prev.filter((r) => r !== reg));
   setTaxiing((prev) => [...prev, reg]);
