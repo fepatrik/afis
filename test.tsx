@@ -262,22 +262,15 @@ const renderAircraft = (
             </div>
           )}
 
-          {trainingBox[reg] && (
-            <div style={{ fontSize: "20px", color: "#ccc", marginBottom: "10px" }}>
-              {trainingBox[reg] === "Proceeding to VC" ? "PROCEEDING TO VC" : `TB ${trainingBox[reg]}`}
-              <input
-                type="text"
-                placeholder="Task, height"
-                style={{
-                  padding: '6px',
-                  borderRadius: '6px',
-                  color: 'black',
-                  marginTop: '8px',
-                  width: '100%',
-                }}
-              />
-            </div>
-          )}
+{trainingBox[reg] && (
+  <div
+    style={{ fontSize: "20px", color: "#ccc", marginBottom: "10px", cursor: "pointer" }}
+    onClick={() => openModal(reg)}
+    title="Click to change training box"
+  >
+    {trainingBox[reg] === "Proceeding to VC" ? "PROCEEDING TO VC" : `TB ${trainingBox[reg]}`}
+  </div>
+)}
 
           {localIR.includes(reg) && (
             <>
