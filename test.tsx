@@ -23,7 +23,18 @@ const getCurrentTime = () => {
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
-
+const moveToLocalIRFromTrainingBox = (reg: string) => {
+  setTrainingBox((prev) => {
+    const copy = { ...prev };
+    delete copy[reg]; // Törli a gépet a Training Box-ból
+    return copy;
+  });
+  setLocalIR((prev) => [...prev, reg]); // Hozzáadja a gépet a Local IR-hez
+  setLocalIRDetails((prev) => ({
+    ...prev,
+    [reg]: { procedure: "---", height: "", clearance: "" }, // Default értékek a Local IR-hez
+  }));
+};
 
 const moveToHoldingPoint = (reg: string) => {
   setTaxiing(taxiing.filter((r) => r !== reg));
@@ -386,6 +397,19 @@ style={{
         }`}
       </style>
 
+
+
+<Section title="AFIS Program - by Ludwig Schwarz Software Company">
+            <input 
+                type="range" 
+                style={{ width: '600px' }} 
+                min="0" 
+                max="100" 
+                defaultValue="50"
+            />
+        </Section>
+
+
 <Section title="Cross Country">
   {renderAircraft(
     crossCountry,
@@ -405,7 +429,7 @@ style={{
   <div style={{ flex: 1, marginRight: "10px" }}>
 <Section title="Local IR">
   {renderAircraft(localIR, [
-    { label: "Joining Visual Circuit", onClick: moveToVisualCircuitFromLocalIR },
+    { label: "Join VC", onClick: moveToVisualCircuitFromLocalIR },
     { label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }, // Add the new button here
   ])}
 </Section>
@@ -413,13 +437,13 @@ style={{
 
   <div style={{ flex: 1, marginLeft: "10px" }}>
     <Section title="Training Box">
-      {renderAircraft(
-        Object.keys(trainingBox),
-        [
-          { label: "Joining Visual Circuit", onClick: moveToVisualFromTrainingBox },
-          { label: "Proceed to Cross Country", onClick: moveToCrossCountry }
-        ]
-      )}
+{renderAircraft(
+  Object.keys(trainingBox),
+  [
+    { label: "Join VC", onClick: moveToVisualFromTrainingBox },
+    { label: "Local IR", onClick: moveToLocalIRFromTrainingBox }
+  ]
+)}
     </Section>
   </div>
 </div>
@@ -427,9 +451,9 @@ style={{
       <Section title={`Visual Circuit (${visualCircuit.length})`}>
         {renderAircraft(visualCircuit, [
           { label: "Runway Vacated", onClick: moveToTaxiingFromVisual },
-          { label: "Proceed to TB", onClick: openModal },
-          { label: "Proceed to Local IR", onClick: moveToLocalIR },
-          { label: "Proceed to Cross Country", onClick: moveToCrossCountry }
+          { label: "Training Box", onClick: openModal },
+          { label: "Local IR", onClick: moveToLocalIR },
+          { label: "Cross Country", onClick: moveToCrossCountry }
         ])}
       </Section>
 
@@ -437,8 +461,8 @@ style={{
   <div style={{ flex: 1, marginRight: "10px" }}>
     <Section title="Holding Point">
       {renderAircraft(holdingPoint, [
-        { label: "--> Visual Circuit", onClick: moveToVisualFromHolding },
-        { label: "<-- Return to stand", onClick: moveBackToTaxiing },
+        { label: "Visual Circuit", onClick: moveToVisualFromHolding },
+        { label: "Return to Stand", onClick: moveBackToTaxiing },
       ], true)}
     </Section>
   </div>
@@ -446,8 +470,8 @@ style={{
   <div style={{ flex: 1, marginLeft: "10px" }}>
     <Section title="Taxiing Aircraft">
       {renderAircraft(taxiing, [
-        { label: "--> Holding Point", onClick: moveToHoldingPoint },
-        { label: "<-- Apron", onClick: moveBackToApron },
+        { label: "Holding Point", onClick: moveToHoldingPoint },
+        { label: "Apron", onClick: moveBackToApron },
       ])}
     </Section>
   </div>
@@ -456,7 +480,7 @@ style={{
 <Section title="Apron">
   {renderAircraft(
     [...apron].sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
-    [{ label: "->>Taxi", onClick: moveToTaxiFromApron }]
+    [{ label: "Taxi", onClick: moveToTaxiFromApron }]
   )}
   <div className="flex gap-2" style={{ marginTop: "10px" }}>
     <input
