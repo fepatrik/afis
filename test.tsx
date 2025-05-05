@@ -16,7 +16,47 @@ const AfisProgram = () => {
   const [selectedAircraft, setSelectedAircraft] = useState<string>("");
   const [crossCountryFrequency, setCrossCountryFrequency] = useState<{ [key: string]: boolean }>({});
   const [timestamps, setTimestamps] = useState<{ [key: string]: { takeoff?: string; landed?: string } }>({});
+  const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
 
+  
+  const styles = {
+  container: {
+    display: "flex",
+    gap: "15px",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    marginBottom: "20px",
+  },
+  aircraftCard: {
+    flexBasis: "22%",
+    maxWidth: "220px",
+    minHeight: "200px",
+    border: "3px solid white",
+    borderRadius: "15px",
+    padding: "12px",
+    margin: "5px",
+    textAlign: "center",
+    boxSizing: "border-box",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    color: "white",
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    fontSize: "18px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  mediaQueries: `
+    @media (max-width: 1024px) {
+      .aircraftCard {
+        flex-basis: 45%;
+        max-width: 100%;
+      }
+      .container {
+        gap: 10px;
+      }
+    }
+  `,
+};
 
 const getCurrentTime = () => {
   const now = new Date();
@@ -216,7 +256,7 @@ const renderAircraft = (
   extraContent?: (reg: string, index?: number) => React.ReactNode,
   isCrossCountry: boolean = false
 ) => (
-  <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", justifyContent: "flex-start", marginBottom: "20px" }}>
+  <div className="container" style={styles.container}>
     {regs.map((reg, index) => {
       const onFreq = crossCountryFrequency[reg] ?? true; // default true
       const isInLocalIR = localIR.includes(reg);
@@ -229,31 +269,21 @@ const renderAircraft = (
         : isInLocalIR || isInTrainingBox || isInVisualCircuit
         ? 'limegreen' // green border for local IR, training box, or visual circuit
         : 'white'; // default to white border
-      
+
       return (
         <div
           key={reg}
+          className="aircraftCard"
           style={{
-            width: "180px",
-            minHeight: "200px",
+            ...styles.aircraftCard,
             border: `3px solid ${borderColor}`,
-            borderRadius: "15px",
-            padding: "12px",
-            margin: "5px",
-            textAlign: "center",
-            boxSizing: "border-box",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            color: "white",
-            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-            fontSize: "18px",
             animation: pulsing ? "pulse 2s infinite" : undefined,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            opacity: isCrossCountry && !onFreq ? 0.5 : 1 // halvány ha nincs frekin
+            opacity: isCrossCountry && !onFreq ? 0.5 : 1, // halvány ha nincs frekin
           }}
         >
-          <div style={{ fontWeight: "bold", fontSize: "24px", marginBottom: "10px" }}>{index + 1}. {reg}</div>
+          <div style={{ fontWeight: "bold", fontSize: "24px", marginBottom: "10px" }}>
+            {index + 1}. {reg}
+          </div>
 
           {isCrossCountry && (
             <div style={{ marginBottom: "10px" }}>
@@ -274,15 +304,15 @@ const renderAircraft = (
             </div>
           )}
 
-{trainingBox[reg] && (
-  <div
-    style={{ fontSize: "20px", color: "#ccc", marginBottom: "10px", cursor: "pointer" }}
-    onClick={() => openModal(reg)}
-    title="Click to change training box"
-  >
-    {trainingBox[reg] === "Proceeding to VC" ? "PROCEEDING TO VC" : `TB ${trainingBox[reg]}`}
-  </div>
-)}
+          {trainingBox[reg] && (
+            <div
+              style={{ fontSize: "20px", color: "#ccc", marginBottom: "10px", cursor: "pointer" }}
+              onClick={() => openModal(reg)}
+              title="Click to change training box"
+            >
+              {trainingBox[reg] === "Proceeding to VC" ? "PROCEEDING TO VC" : `TB ${trainingBox[reg]}`}
+            </div>
+          )}
 
           {localIR.includes(reg) && (
             <>
@@ -316,55 +346,55 @@ const renderAircraft = (
 
           {/* Take-off és Landed idő kijelzése */}
           {timestamps[reg]?.takeoff && (
-  <div style={{
-    fontSize: "14px",
-    color: "white",
-    backgroundColor: "black",
-    borderRadius: "6px",
-    padding: "6px",
-    fontWeight: "bold",
-    marginTop: "8px",
-    boxShadow: "0px 0px 10px rgba(0, 255, 0, 0.6)",
-  }}>
-    Take-off: {timestamps[reg].takeoff}
-  </div>
-)}
-{timestamps[reg]?.landed && (
-  <div style={{
-    fontSize: "14px",
-    color: "white",
-    backgroundColor: "black",
-    borderRadius: "6px",
-    padding: "6px",
-    fontWeight: "bold",
-    marginTop: "8px",
-    boxShadow: "0px 0px 10px rgba(0, 0, 255, 0.6)",
-  }}>
-    Landed: {timestamps[reg].landed}
-  </div>
-)}
+            <div style={{
+              fontSize: "14px",
+              color: "white",
+              backgroundColor: "black",
+              borderRadius: "6px",
+              padding: "6px",
+              fontWeight: "bold",
+              marginTop: "8px",
+              boxShadow: "0px 0px 10px rgba(0, 255, 0, 0.6)",
+            }}>
+              Take-off: {timestamps[reg].takeoff}
+            </div>
+          )}
+          {timestamps[reg]?.landed && (
+            <div style={{
+              fontSize: "14px",
+              color: "white",
+              backgroundColor: "black",
+              borderRadius: "6px",
+              padding: "6px",
+              fontWeight: "bold",
+              marginTop: "8px",
+              boxShadow: "0px 0px 10px rgba(0, 0, 255, 0.6)",
+            }}>
+              Landed: {timestamps[reg].landed}
+            </div>
+          )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "10px" }}>
             {actions.map(({ label, onClick }) => (
               <button
                 key={label}
-style={{
-  width: "100%",
-  padding: "10px",
-  backgroundColor:
-    label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country"
-      ? "#28a745" // Green for "Proceed to TB", "Proceed to Local IR", and "Proceed to Cross Country"
-      : label.includes("<--") || label.includes("Vacated") || label.includes("Apron")
-      ? "#dc3545" // Red for specific actions
-      : "#28a745", // Green for default actions
-  color: "white",
-  fontSize: "16px",
-  fontWeight: "bold",
-  borderRadius: "10px",
-  border: "none",
-  cursor: "pointer",
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-}}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  backgroundColor:
+                    label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country"
+                      ? "#28a745" // Green for "Proceed to TB", "Proceed to Local IR", and "Proceed to Cross Country"
+                      : label.includes("<--") || label.includes("Vacated") || label.includes("Apron")
+                      ? "#dc3545" // Red for specific actions
+                      : "#28a745", // Green for default actions
+                  color: "white",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  borderRadius: "10px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                }}
                 onClick={() => onClick(reg)}
               >
                 {label}
@@ -397,7 +427,7 @@ style={{
         }`}
       </style>
 
-
+      <style>{styles.mediaQueries}</style>
 
 <Section title="AFIS Program - by Ludwig Schwarz Software Company">
             <input 
