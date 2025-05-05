@@ -24,6 +24,7 @@ const getCurrentTime = () => {
 };
 
 
+
 const moveToHoldingPoint = (reg: string) => {
   setTaxiing(taxiing.filter((r) => r !== reg));
   setHoldingPoint([...holdingPoint, reg]);
@@ -279,7 +280,7 @@ const renderAircraft = (
                 onChange={(e) => handleLocalIRChange(reg, 'procedure', e.target.value)}
                 style={{ marginBottom: '8px', padding: '6px', borderRadius: '6px' }}
               >
-                {["---", "NDB Traffic Pattern", "Holding over NYR", "Holding over PQ", "RNP Z", "RNP Y", "RNP Y Circle to Land", "RNP Z Circle to Land", "VOR APP", "NDB APP"].map(option => (
+                {["---", "NDB Traffic Pattern", "Holding NYR", "Holding PQ", "RNP Z", "RNP Y", "RNP Y Circle to Land", "RNP Z Circle to Land", "VOR APP", "NDB APP"].map(option => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
@@ -294,7 +295,7 @@ const renderAircraft = (
                 type="text"
                 value={localIRDetails[reg]?.clearance || ""}
                 onChange={(e) => handleLocalIRChange(reg, 'clearance', e.target.value)}
-                placeholder="Clearance"
+                placeholder="Remark"
                 style={{ padding: '6px', borderRadius: '6px', color: 'black' }}
               />
             </>
@@ -336,18 +337,23 @@ const renderAircraft = (
             {actions.map(({ label, onClick }) => (
               <button
                 key={label}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  backgroundColor: label.includes("<--") || label.includes("Vacated") || label.includes("Apron") ? "#dc3545" : "#28a745",
-                  color: "white",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  borderRadius: "10px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-                }}
+style={{
+  width: "100%",
+  padding: "10px",
+  backgroundColor:
+    label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country"
+      ? "#28a745" // Green for "Proceed to TB", "Proceed to Local IR", and "Proceed to Cross Country"
+      : label.includes("<--") || label.includes("Vacated") || label.includes("Apron")
+      ? "#dc3545" // Red for specific actions
+      : "#28a745", // Green for default actions
+  color: "white",
+  fontSize: "16px",
+  fontWeight: "bold",
+  borderRadius: "10px",
+  border: "none",
+  cursor: "pointer",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+}}
                 onClick={() => onClick(reg)}
               >
                 {label}
@@ -397,9 +403,12 @@ const renderAircraft = (
 
 <div style={{ display: "flex", width: "100%", marginBottom: "25px" }}>
   <div style={{ flex: 1, marginRight: "10px" }}>
-    <Section title="Local IR">
-      {renderAircraft(localIR, [{ label: "Joining Visual Circuit", onClick: moveToVisualCircuitFromLocalIR }])}
-    </Section>
+<Section title="Local IR">
+  {renderAircraft(localIR, [
+    { label: "Joining Visual Circuit", onClick: moveToVisualCircuitFromLocalIR },
+    { label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }, // Add the new button here
+  ])}
+</Section>
   </div>
 
   <div style={{ flex: 1, marginLeft: "10px" }}>
@@ -444,24 +453,27 @@ const renderAircraft = (
   </div>
 </div>
 
-      <Section title="Apron">
-        {renderAircraft(apron, [{ label: "->>Taxi", onClick: moveToTaxiFromApron }])}
-        <div className="flex gap-2" style={{ marginTop: "10px" }}>
-          <input
-            type="text"
-            value={newReg}
-            onChange={(e) => setNewReg(e.target.value)}
-            placeholder="Új lajstrom"
-            style={{ padding: "8px", borderRadius: "8px", fontSize: "16px", color: "black" }}
-          />
-          <button
-            onClick={addAircraftToApron}
-            style={{ padding: "8px 16px", fontSize: "16px", backgroundColor: "#28a745", color: "white", borderRadius: "8px", cursor: "pointer", border: "none" }}
-          >
-            Hozzáadás
-          </button>
-        </div>
-      </Section>
+<Section title="Apron">
+  {renderAircraft(
+    [...apron].sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
+    [{ label: "->>Taxi", onClick: moveToTaxiFromApron }]
+  )}
+  <div className="flex gap-2" style={{ marginTop: "10px" }}>
+    <input
+      type="text"
+      value={newReg}
+      onChange={(e) => setNewReg(e.target.value)}
+      placeholder="Új lajstrom"
+      style={{ padding: "8px", borderRadius: "8px", fontSize: "16px", color: "black" }}
+    />
+    <button
+      onClick={addAircraftToApron}
+      style={{ padding: "8px 16px", fontSize: "16px", backgroundColor: "#28a745", color: "white", borderRadius: "8px", cursor: "pointer", border: "none" }}
+    >
+      Hozzáadás
+    </button>
+  </div>
+</Section>
 	  
 	  
 	  
