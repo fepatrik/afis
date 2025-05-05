@@ -16,47 +16,47 @@ const AfisProgram = () => {
   const [selectedAircraft, setSelectedAircraft] = useState<string>("");
   const [crossCountryFrequency, setCrossCountryFrequency] = useState<{ [key: string]: boolean }>({});
   const [timestamps, setTimestamps] = useState<{ [key: string]: { takeoff?: string; landed?: string } }>({});
-  const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
+const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
 
-  
   const styles = {
-  container: {
-    display: "flex",
-    gap: "15px",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-    marginBottom: "20px",
-  },
-  aircraftCard: {
-    flexBasis: "22%",
-    maxWidth: "220px",
-    minHeight: "200px",
-    border: "3px solid white",
-    borderRadius: "15px",
-    padding: "12px",
-    margin: "5px",
-    textAlign: "center",
-    boxSizing: "border-box",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    color: "white",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    fontSize: "18px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-  },
-  mediaQueries: `
-    @media (max-width: 1024px) {
-      .aircraftCard {
-        flex-basis: 45%;
-        max-width: 100%;
+    container: {
+      display: "flex",
+      gap: `${15 * scale}px`,
+      flexWrap: "wrap",
+      justifyContent: "flex-start",
+      marginBottom: `${20 * scale}px`,
+    },
+    aircraftCard: {
+      flexBasis: `${22 * scale}%`,
+      maxWidth: `${220 * scale}px`,
+      minHeight: `${200 * scale}px`,
+      border: `${3 * scale}px solid white`,
+      borderRadius: `${15 * scale}px`,
+      padding: `${12 * scale}px`,
+      margin: `${5 * scale}px`,
+      textAlign: "center",
+      boxSizing: "border-box",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      color: "white",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      fontSize: `${18 * scale}px`,
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+    },
+    mediaQueries: `
+      @media (max-width: ${1024 * scale}px) {
+        .aircraftCard {
+          flex-basis: ${45 * scale}%;
+          max-width: 100%;
+        }
+        .container {
+          gap: ${10 * scale}px;
+        }
       }
-      .container {
-        gap: 10px;
-      }
-    }
-  `,
-};
+    `,
+  };
+
 
 const getCurrentTime = () => {
   const now = new Date();
@@ -430,14 +430,25 @@ const renderAircraft = (
       <style>{styles.mediaQueries}</style>
 
 <Section title="AFIS Program - by Ludwig Schwarz Software Company">
-            <input 
-                type="range" 
-                style={{ width: '600px' }} 
-                min="0" 
-                max="100" 
-                defaultValue="50"
-            />
-        </Section>
+  <input
+    type="range"
+    style={{ width: '600px' }} // Fix szélesség, nem hat a skála
+    min="0.1" // 10%-nak megfelelő alsó érték
+    max="1.1" // 110%-nak megfelelő felső érték
+    step="0.001" // Nagyon finom lépések
+    value={scale}
+    onChange={(e) => setScale(parseFloat(e.target.value))} // A skálaérték frissítése
+  />
+  <div
+    style={{
+      marginTop: '20px', // Fix margin, nem változik a skálával
+      padding: '10px', // Fix padding, nem változik a skálával
+      fontSize: '16px', // Fix betűméret, nem változik a skálával
+    }}
+  >
+    Use the slider above to adjust the UI scale dynamically.
+  </div>
+</Section>
 
 
 <Section title="Cross Country">
@@ -492,7 +503,7 @@ const renderAircraft = (
     <Section title="Holding Point">
       {renderAircraft(holdingPoint, [
         { label: "Visual Circuit", onClick: moveToVisualFromHolding },
-        { label: "Return to Stand", onClick: moveBackToTaxiing },
+        { label: "Return to stand", onClick: moveBackToTaxiing },
       ], true)}
     </Section>
   </div>
