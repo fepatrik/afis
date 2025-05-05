@@ -279,15 +279,16 @@ const renderAircraft = (
             border: `3px solid ${borderColor}`,
             animation: pulsing ? "pulse 2s infinite" : undefined,
             opacity: isCrossCountry && !onFreq ? 0.5 : 1, // halvány ha nincs frekin
+            fontSize: `${18 * scale}px`, // Betűméret szorzása a scale értékével
           }}
         >
-          <div style={{ fontWeight: "bold", fontSize: "24px", marginBottom: "10px" }}>
+          <div style={{ fontWeight: "bold", fontSize: `${24 * scale}px`, marginBottom: `${10 * scale}px` }}>
             {index + 1}. {reg}
           </div>
 
           {isCrossCountry && (
-            <div style={{ marginBottom: "10px" }}>
-              <label style={{ fontSize: "14px" }}>
+            <div style={{ marginBottom: `${10 * scale}px` }}>
+              <label style={{ fontSize: `${14 * scale}px` }}>
                 On Frequency
                 <input
                   type="checkbox"
@@ -298,7 +299,7 @@ const renderAircraft = (
                       [reg]: !prev[reg]
                     }))
                   }
-                  style={{ marginLeft: "8px", transform: "scale(1.5)" }}
+                  style={{ marginLeft: `${8 * scale}px`, transform: `scale(${1.5 * scale})` }}
                 />
               </label>
             </div>
@@ -306,7 +307,7 @@ const renderAircraft = (
 
           {trainingBox[reg] && (
             <div
-              style={{ fontSize: "20px", color: "#ccc", marginBottom: "10px", cursor: "pointer" }}
+              style={{ fontSize: `${20 * scale}px`, color: "#ccc", marginBottom: `${10 * scale}px`, cursor: "pointer" }}
               onClick={() => openModal(reg)}
               title="Click to change training box"
             >
@@ -319,7 +320,7 @@ const renderAircraft = (
               <select
                 value={localIRDetails[reg]?.procedure || "---"}
                 onChange={(e) => handleLocalIRChange(reg, 'procedure', e.target.value)}
-                style={{ marginBottom: '8px', padding: '6px', borderRadius: '6px' }}
+                style={{ marginBottom: `${8 * scale}px`, padding: `${6 * scale}px`, borderRadius: `${6 * scale}px` }}
               >
                 {["---", "NDB Traffic Pattern", "Holding NYR", "Holding PQ", "RNP Z", "RNP Y", "RNP Y Circle to Land", "RNP Z Circle to Land", "VOR APP", "NDB APP"].map(option => (
                   <option key={option} value={option}>{option}</option>
@@ -330,14 +331,14 @@ const renderAircraft = (
                 value={localIRDetails[reg]?.height || ""}
                 onChange={(e) => handleLocalIRChange(reg, 'height', e.target.value)}
                 placeholder="Height"
-                style={{ padding: '6px', borderRadius: '6px', color: 'black', marginBottom: '8px' }}
+                style={{ padding: `${6 * scale}px`, borderRadius: `${6 * scale}px`, color: 'black', marginBottom: `${8 * scale}px` }}
               />
               <input
                 type="text"
                 value={localIRDetails[reg]?.clearance || ""}
                 onChange={(e) => handleLocalIRChange(reg, 'clearance', e.target.value)}
                 placeholder="Remark"
-                style={{ padding: '6px', borderRadius: '6px', color: 'black' }}
+                style={{ padding: `${6 * scale}px`, borderRadius: `${6 * scale}px`, color: 'black' }}
               />
             </>
           )}
@@ -347,13 +348,13 @@ const renderAircraft = (
           {/* Take-off és Landed idő kijelzése */}
           {timestamps[reg]?.takeoff && (
             <div style={{
-              fontSize: "14px",
+              fontSize: `${14 * scale}px`,
               color: "white",
               backgroundColor: "black",
-              borderRadius: "6px",
-              padding: "6px",
+              borderRadius: `${6 * scale}px`,
+              padding: `${6 * scale}px`,
               fontWeight: "bold",
-              marginTop: "8px",
+              marginTop: `${8 * scale}px`,
               boxShadow: "0px 0px 10px rgba(0, 255, 0, 0.6)",
             }}>
               Take-off: {timestamps[reg].takeoff}
@@ -361,26 +362,26 @@ const renderAircraft = (
           )}
           {timestamps[reg]?.landed && (
             <div style={{
-              fontSize: "14px",
+              fontSize: `${14 * scale}px`,
               color: "white",
               backgroundColor: "black",
-              borderRadius: "6px",
-              padding: "6px",
+              borderRadius: `${6 * scale}px`,
+              padding: `${6 * scale}px`,
               fontWeight: "bold",
-              marginTop: "8px",
+              marginTop: `${8 * scale}px`,
               boxShadow: "0px 0px 10px rgba(0, 0, 255, 0.6)",
             }}>
               Landed: {timestamps[reg].landed}
             </div>
           )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "10px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: `${6 * scale}px`, marginTop: `${10 * scale}px` }}>
             {actions.map(({ label, onClick }) => (
               <button
                 key={label}
                 style={{
                   width: "100%",
-                  padding: "10px",
+                  padding: `${10 * scale}px`,
                   backgroundColor:
                     label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country"
                       ? "#28a745" // Green for "Proceed to TB", "Proceed to Local IR", and "Proceed to Cross Country"
@@ -388,9 +389,9 @@ const renderAircraft = (
                       ? "#dc3545" // Red for specific actions
                       : "#28a745", // Green for default actions
                   color: "white",
-                  fontSize: "16px",
+                  fontSize: `${16 * scale}px`,
                   fontWeight: "bold",
-                  borderRadius: "10px",
+                  borderRadius: `${10 * scale}px`,
                   border: "none",
                   cursor: "pointer",
                   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
@@ -401,13 +402,6 @@ const renderAircraft = (
               </button>
             ))}
           </div>
-
-          {visualCircuit.includes(reg) && (
-            <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
-              <button onClick={() => moveLeft(reg)} style={{ padding: "5px", fontSize: "20px", borderRadius: "6px" }}>←</button>
-              <button onClick={() => moveRight(reg)} style={{ padding: "5px", fontSize: "20px", borderRadius: "6px" }}>→</button>
-            </div>
-          )}
         </div>
       );
     })}
@@ -433,8 +427,8 @@ const renderAircraft = (
   <input
     type="range"
     style={{ width: '600px' }} // Fix szélesség, nem hat a skála
-    min="0.1" // 10%-nak megfelelő alsó érték
-    max="1.1" // 110%-nak megfelelő felső érték
+    min="0.5" // 10%-nak megfelelő alsó érték
+    max="1.2" // 110%-nak megfelelő felső érték
     step="0.001" // Nagyon finom lépések
     value={scale}
     onChange={(e) => setScale(parseFloat(e.target.value))} // A skálaérték frissítése
@@ -446,7 +440,7 @@ const renderAircraft = (
       fontSize: '16px', // Fix betűméret, nem változik a skálával
     }}
   >
-    Use the slider above to adjust the UI scale dynamically.
+    Adjust scaling with the slider. Click on active training box to switch selected training box. Data is lost after refreshing the page!
   </div>
 </Section>
 
