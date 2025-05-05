@@ -52,6 +52,16 @@ const getCurrentTime = () => {
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
+const moveToHoldingPointFromApron = (reg: string) => {
+  setApron((prev) => prev.filter((r) => r !== reg)); // Eltávolítja a gépet az Apron állapotból
+  setHoldingPoint((prev) => [...prev, reg]);        // Hozzáadja a gépet a Holding Point állapothoz
+  setTimestamps((prev) => {
+    const updatedTimestamps = { ...prev };
+    delete updatedTimestamps[reg]; // Reset timestamp when moving from Apron to Holding Point
+    return updatedTimestamps;
+  });
+};
+
 const moveToLocalIRFromTrainingBox = (reg: string) => {
   setTrainingBox((prev) => {
     const copy = { ...prev };
@@ -506,7 +516,10 @@ const renderAircraft = (
 <Section title="Apron">
   {renderAircraft(
     [...apron].sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
-    [{ label: "Taxi", onClick: moveToTaxiFromApron }]
+    [
+      { label: "Taxi", onClick: moveToTaxiFromApron },
+      { label: "Holding Point", onClick: moveToHoldingPointFromApron }, // Új gomb hozzáadása
+    ]
   )}
   <div className="flex gap-2" style={{ marginTop: "10px" }}>
     <input
