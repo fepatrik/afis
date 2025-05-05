@@ -8,7 +8,7 @@ const AfisProgram = () => {
   const [visualCircuit, setVisualCircuit] = useState<string[]>([]);
   const [trainingBox, setTrainingBox] = useState<{ [key: string]: string }>({});
   const [crossCountry, setCrossCountry] = useState<string[]>([]);
-  const [apron, setApron] = useState(["TUR", "TUP", "TUQ", "BEC", "BED", "BEZ", "BJD", "BAK", "BFI", "BFJ","BJA", "BJC", "BFK", "BEY", "BFE", "BIY", "SKV", "SJK", "SUK", "PPL", "BAF", "SLW"]);
+  const [apron, setApron] = useState(["TUR", "TUP", "TUQ", "BEC", "BED", "BEZ", "BJD", "BAK", "BFI", "BFJ", "BJC", "BFK", "BEY", "BFE", "BIY", "SKV", "SJK", "SUK", "PPL", "BAF", "SLW"]);
   const [newReg, setNewReg] = useState<string>("");
   const [localIR, setLocalIR] = useState<string[]>([]);
   const [localIRDetails, setLocalIRDetails] = useState<{ [key: string]: { procedure: string; height: string; clearance: string } }>({});
@@ -28,8 +28,8 @@ const styles = {
   } as React.CSSProperties,
   aircraftCard: {
     flexBasis: `${22 * scale}%`,
-    maxWidth: `${220 * scale}px`,
-    minHeight: `${200 * scale}px`,
+    maxWidth: `${180 * scale}px`,
+    minHeight: `${20 * scale}px`,
     border: `${3 * scale}px solid white`,
     borderRadius: `${15 * scale}px`,
     padding: `${12 * scale}px`,
@@ -371,13 +371,15 @@ const renderAircraft = (
                 style={{
                   width: "100%",
                   padding: `${10 * scale}px`,
-                  backgroundColor:
-                    label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country"
-                      ? "#28a745" // Green for "Proceed to TB", "Proceed to Local IR", and "Proceed to Cross Country"
-                      : label.includes("<--") || label.includes("Vacated") || label.includes("Apron")
-                      ? "#dc3545" // Red for specific actions
-                      : "#28a745", // Green for default actions
-                  color: "white",
+      backgroundColor:
+        label === "Return to Stand" // Ellenőrizzük, hogy a cím "Return to stand"-e
+          ? "#dc3545" // Piros szín
+          : label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country"
+          ? "#28a745" // Zöld szín a Proceed gombokhoz
+          : label.includes("<--") || label.includes("Vacated") || label.includes("Apron")
+          ? "#dc3545" // További piros gombok
+          : "#28a745", // Alapértelmezett zöld szín
+      color: "white",
                   fontSize: `${16 * scale}px`,
                   fontWeight: "bold",
                   borderRadius: `${10 * scale}px`,
@@ -486,7 +488,7 @@ const renderAircraft = (
     <Section title="Holding Point">
       {renderAircraft(holdingPoint, [
         { label: "Visual Circuit", onClick: moveToVisualFromHolding },
-        { label: "Return to stand", onClick: moveBackToTaxiing },
+        { label: "Return to Stand", onClick: moveBackToTaxiing },
       ], true)}
     </Section>
   </div>
