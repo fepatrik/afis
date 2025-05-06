@@ -8,7 +8,7 @@ const AfisProgram = () => {
   const [visualCircuit, setVisualCircuit] = useState<string[]>([]);
   const [trainingBox, setTrainingBox] = useState<{ [key: string]: string }>({});
   const [crossCountry, setCrossCountry] = useState<string[]>([]);
-  const [apron, setApron] = useState(["TUR", "TUP", "TUQ", "BEC", "BED", "BEZ", "BJD", "BAK", "BFI", "BFJ", "BJC", "BFK", "BEY", "BFE", "BIY", "SKV", "SJK", "SUK", "PPL", "BAF", "SLW"]);
+  const [apron, setApron] = useState(["TUR", "TUP", "TUQ", "BEC", "BED", "BEZ", "BJD", "BAK", "BFI", "BFJ", "BJC", "BJA", "BFK", "BEY", "BFE", "BIY", "SKV", "SJK", "SUK", "PPL", "BAF", "SLW"]);
   const [newReg, setNewReg] = useState<string>("");
   const [localIR, setLocalIR] = useState<string[]>([]);
   const [localIRDetails, setLocalIRDetails] = useState<{ [key: string]: { procedure: string; height: string; clearance: string } }>({});
@@ -321,7 +321,7 @@ const renderAircraft = (
                 onChange={(e) => handleLocalIRChange(reg, 'procedure', e.target.value)}
                 style={{ marginBottom: `${8 * scale}px`, padding: `${6 * scale}px`, borderRadius: `${6 * scale}px` }}
               >
-                {["---", "NDB Traffic Pattern", "Holding NYR", "Holding PQ", "RNP Z", "RNP Y", "RNP Y Circle to Land", "RNP Z Circle to Land", "VOR APP", "NDB APP"].map(option => (
+                {["---", "NDB Traffic Pattern", "Holding NYR", "Holding PQ", "RNP Z", "RNP Y", "RNP Y Circle to Land", "RNP Z Circle to Land", "VOR APP", "VOR TEMPO APP", "NDB TEMPO APP", "NDB APP","BOR APP","NCS NDB APP"].map(option => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
@@ -424,7 +424,7 @@ const renderAircraft = (
 
 
 
-<Section title="AFIS Program - by Ludwig Schwarz Software Company">
+<Section title="LHNY AFIS - by Ludwig Schwarz Software Company">
   <input
     type="range"
     style={{ width: '600px' }} // Fix szélesség, nem hat a skála
@@ -525,13 +525,27 @@ const renderAircraft = (
     <input
       type="text"
       value={newReg}
-      onChange={(e) => setNewReg(e.target.value)}
+      onChange={(e) => setNewReg(e.target.value.toUpperCase())} // Kisbetűk nagybetűvé alakítása
       placeholder="Új lajstrom"
-      style={{ padding: "8px", borderRadius: "8px", fontSize: "16px", color: "black" }}
+      style={{
+        padding: "8px",
+        borderRadius: "8px",
+        fontSize: "16px",
+        color: "black",
+        textTransform: "uppercase", // Megjelenítés: mindig nagybetűs
+      }}
     />
     <button
       onClick={addAircraftToApron}
-      style={{ padding: "8px 16px", fontSize: "16px", backgroundColor: "#28a745", color: "white", borderRadius: "8px", cursor: "pointer", border: "none" }}
+      style={{
+        padding: "8px 16px",
+        fontSize: "16px",
+        backgroundColor: "#28a745",
+        color: "white",
+        borderRadius: "8px",
+        cursor: "pointer",
+        border: "none",
+      }}
     >
       Hozzáadás
     </button>
@@ -565,7 +579,7 @@ const renderAircraft = (
             color: "white"
           }}>
             <h3 style={{ fontSize: "20px", marginBottom: "16px" }}>Choose TB for {selectedAircraft}:</h3>
-            {["1", "2", "3", "4", "5", "6","7", "5-6","1-2","2-3","1-2-3", "100",].map((box) => (
+            {["1", "2", "3", "4", "5", "6","7", "5-6","1-2","2-3","1-2-3", "100","PROCEEDING TO VC"].map((box) => (
               <button
                 key={box}
                 onClick={() => handleTrainingBoxSelection(box)}
