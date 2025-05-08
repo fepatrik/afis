@@ -174,10 +174,11 @@ const moveBackToApron = (reg: string) => {
   });
 };
 
-  const moveToTrainingBox = (reg: string, box: string) => {
-    setVisualCircuit(visualCircuit.filter((r) => r !== reg));
-    setTrainingBox({ ...trainingBox, [reg]: box });
-  };
+const moveToTrainingBox = (reg: string, box: string) => {
+  setVisualCircuit(visualCircuit.filter((r) => r !== reg));
+  setTrainingBox({ ...trainingBox, [reg]: box });
+  setLocalIR(localIR.filter((r) => r !== reg)); // Hozzáadott sor: törli a gépet a Local IR-ből
+};
 
   const moveToLocalIR = (reg: string) => {
     setVisualCircuit(visualCircuit.filter((r) => r !== reg));
@@ -467,7 +468,7 @@ const renderAircraft = (
   {renderAircraft(
     crossCountry,
     [
-      { label: "Joining Visual Circuit", onClick: moveToVisualFromCrossCountry },
+      { label: "Joining VC", onClick: moveToVisualFromCrossCountry },
       { label: "Local IR", onClick: moveToLocalIRFromCrossCountry }, // Új gomb hozzáadása
     ],
     false,
@@ -535,8 +536,22 @@ const renderAircraft = (
 </div>
 
 <Section title="Apron">
+  <input
+    type="text"
+    placeholder="Search by registration"
+    onChange={(e) => setSearchTerm(e.target.value.toUpperCase())} // Állapot frissítése nagybetűs formában
+    style={{
+      padding: "8px",
+      borderRadius: "8px",
+      fontSize: "16px",
+      marginBottom: "10px",
+      width: "30%",
+    }}
+  />
   {renderAircraft(
-    [...apron].sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
+    [...apron]
+      .filter((reg) => reg.includes(searchTerm)) // Szűrés a keresési feltétel alapján
+      .sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
     [
       { label: "Taxi", onClick: moveToTaxiFromApron },
       { label: "Holding Point", onClick: moveToHoldingPointFromApron },
