@@ -8,7 +8,7 @@ const AfisProgram = () => {
   const [visualCircuit, setVisualCircuit] = useState<string[]>([]);
   const [trainingBox, setTrainingBox] = useState<{ [key: string]: string }>({});
   const [crossCountry, setCrossCountry] = useState<string[]>([]);
-  const [apron, setApron] = useState(["TUR", "TUP", "TUQ", "BEC", "BED", "BEZ", "BJD", "BAK", "BFI", "BFJ", "BJC", "BFK", "BEY", "BFE", "BIY", "SKV", "SJK", "SUK", "PPL", "BAF", "SLW"]);
+  const [apron, setApron] = useState(["TUR", "TUP", "TUQ", "BEC", "BED", "BEZ", "BJD", "BAK", "BFI", "BFJ", "BJC", "BJA", "BFK", "BEY", "BFE", "BIY", "SKV", "SJK", "SUK", "PPL", "BAF", "SLW"]);
   const [newReg, setNewReg] = useState<string>("");
   const [localIR, setLocalIR] = useState<string[]>([]);
   const [localIRDetails, setLocalIRDetails] = useState<{ [key: string]: { procedure: string; height: string; clearance: string } }>({});
@@ -17,6 +17,7 @@ const AfisProgram = () => {
   const [crossCountryFrequency, setCrossCountryFrequency] = useState<{ [key: string]: boolean }>({});
   const [timestamps, setTimestamps] = useState<{ [key: string]: { takeoff?: string; landed?: string } }>({});
 const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
+const [searchTerm, setSearchTerm] = useState<string>(""); // Keresési kifejezés
 
 const styles = {
   container: {
@@ -50,6 +51,13 @@ const styles = {
 const getCurrentTime = () => {
   const now = new Date();
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+};
+
+
+
+const moveToCrossCountryFromApron = (reg: string) => {
+  setApron((prev) => prev.filter((r) => r !== reg)); // Eltávolítja a gépet az Apron állapotból
+  setCrossCountry((prev) => [...prev, reg]);        // Hozzáadja a gépet a Cross Country állapothoz
 };
 
 const moveToHoldingPointFromApron = (reg: string) => {
@@ -139,12 +147,19 @@ const moveToTaxiingFromVisual = (reg: string) => {
     setLocalIRDetails(updatedDetails);
   };
 
-  const addAircraftToApron = () => {
-    if (newReg) {
-      setApron([...apron, newReg]);
-      setNewReg("");
-    }
-  };
+const addAircraftToApron = () => {
+  if (!newReg) return; // Ha nincs megadva lajstrom, ne csináljon semmit
+
+  // Ellenőrizze, hogy létezik-e már a lajstrom
+  if (apron.includes(newReg)) {
+    alert("This registration already exists you dumbass!");
+    return;
+  }
+
+  // Ha nem létezik, adjuk hozzá
+  setApron([...apron, newReg]);
+  setNewReg(""); // Törölje az input mezőt
+};
 
 const moveToTaxiFromApron = (reg: string) => {
   setApron(apron.filter((r) => r !== reg));
@@ -166,10 +181,11 @@ const moveBackToApron = (reg: string) => {
   });
 };
 
-  const moveToTrainingBox = (reg: string, box: string) => {
-    setVisualCircuit(visualCircuit.filter((r) => r !== reg));
-    setTrainingBox({ ...trainingBox, [reg]: box });
-  };
+const moveToTrainingBox = (reg: string, box: string) => {
+  setVisualCircuit(visualCircuit.filter((r) => r !== reg));
+  setTrainingBox({ ...trainingBox, [reg]: box });
+  setLocalIR(localIR.filter((r) => r !== reg)); // Hozzáadott sor: törli a gépet a Local IR-ből
+};
 
   const moveToLocalIR = (reg: string) => {
     setVisualCircuit(visualCircuit.filter((r) => r !== reg));
@@ -189,6 +205,15 @@ const moveToCrossCountry = (reg: string) => {
   setTaxiing((prev) => prev.filter((r) => r !== reg));
   setCrossCountry((prev) => [...prev, reg]);
   setCrossCountryFrequency((prev) => ({ ...prev, [reg]: true })); // << EZ AZ ÚJ SOR
+};
+
+const moveToLocalIRFromCrossCountry = (reg: string) => {
+  setCrossCountry((prev) => prev.filter((r) => r !== reg)); // Eltávolítja a Cross Country állapotból
+  setLocalIR((prev) => [...prev, reg]); // Hozzáadja a Local IR állapothoz
+  setLocalIRDetails((prev) => ({
+    ...prev,
+    [reg]: { procedure: "---", height: "", clearance: "" }, // Alapértelmezett értékek a Local IR-hez
+  }));
 };
 
   const moveToVisualFromTrainingBox = (reg: string) => {
@@ -374,35 +399,36 @@ const renderAircraft = (
             </div>
           )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: `${6 * scale}px`, marginTop: `${10 * scale}px` }}>
-            {actions.map(({ label, onClick }) => (
-              <button
-                key={label}
-                style={{
-                  width: "100%",
-                  padding: `${10 * scale}px`,
-      backgroundColor:
-        label === "Return to Stand" // Ellenőrizzük, hogy a cím "Return to stand"-e
-          ? "#dc3545" // Piros szín
-          : label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country"
-          ? "#28a745" // Zöld szín a Proceed gombokhoz
-          : label.includes("<--") || label.includes("Vacated") || label.includes("Apron")
-          ? "#dc3545" // További piros gombok
-          : "#28a745", // Alapértelmezett zöld szín
-      color: "white",
-                  fontSize: `${16 * scale}px`,
-                  fontWeight: "bold",
-                  borderRadius: `${10 * scale}px`,
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-                }}
-                onClick={() => onClick(reg)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+<div style={{
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr", // 2 oszlop
+  gap: `${6 * scale}px`, // Távolság a gombok között
+  marginTop: `${10 * scale}px`
+}}>
+  {actions.map(({ label, onClick }, index) => (
+    <button
+      key={label}
+      style={{
+        padding: `${8 * scale}px`, // Csökkentett padding
+        backgroundColor:
+          label === "Return to Stand" ? "#dc3545" :
+          label === "Proceed to TB" || label === "Proceed to Local IR" || label === "Proceed to Cross Country" ? "#28a745" :
+          label.includes("<--") || label.includes("Vacated") || label.includes("Apron") ? "#dc3545" : "#28a745",
+        color: "white",
+        fontSize: `${14 * scale}px`, // Csökkentett betűméret
+        fontWeight: "bold",
+        borderRadius: `${8 * scale}px`, // Csökkentett border-radius
+        border: "none",
+        cursor: "pointer",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        gridColumn: actions.length === 1 || actions.length % 2 !== 0 && index === actions.length - 1 ? "span 2" : undefined, // Ha egy gomb van, vagy utolsó gomb páratlan számban, töltsön ki két oszlopot
+      }}
+      onClick={() => onClick(reg)}
+    >
+      {label}
+    </button>
+  ))}
+</div>
         </div>
       );
     })}
@@ -449,7 +475,10 @@ const renderAircraft = (
 <Section title="Cross Country">
   {renderAircraft(
     crossCountry,
-    [{ label: "Joining Visual Circuit", onClick: moveToVisualFromCrossCountry }],
+    [
+      { label: "Joining VC", onClick: moveToVisualFromCrossCountry },
+      { label: "Local IR", onClick: moveToLocalIRFromCrossCountry }, // Új gomb hozzáadása
+    ],
     false,
     (reg) => (
       <textarea
@@ -457,7 +486,7 @@ const renderAircraft = (
         placeholder="Proceeding to..."
       />
     ),
-    true // << EZ AZ ÚJ FLAG: isCrossCountry
+    true // Flag indicating Cross Country state
   )}
 </Section>
 
@@ -466,7 +495,8 @@ const renderAircraft = (
 <Section title="Local IR">
   {renderAircraft(localIR, [
     { label: "Join VC", onClick: moveToVisualCircuitFromLocalIR },
-    { label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }, // Add the new button here
+    { label: "Training Box", onClick: openModal }, // Új gomb hozzáadása
+	{ label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }
   ])}
 </Section>
   </div>
@@ -486,10 +516,10 @@ const renderAircraft = (
 
       <Section title={`Visual Circuit (${visualCircuit.length})`}>
         {renderAircraft(visualCircuit, [
-          { label: "Runway Vacated", onClick: moveToTaxiingFromVisual },
           { label: "Training Box", onClick: openModal },
           { label: "Local IR", onClick: moveToLocalIR },
-          { label: "Cross Country", onClick: moveToCrossCountry }
+          { label: "Cross Country", onClick: moveToCrossCountry },
+		  { label: "Runway Vacated", onClick: moveToTaxiingFromVisual }
         ])}
       </Section>
 
@@ -514,11 +544,27 @@ const renderAircraft = (
 </div>
 
 <Section title="Apron">
+<input
+  type="text"
+  placeholder="Search by registration"
+  onChange={(e) => setSearchTerm(e.target.value.toUpperCase())} // Állapot frissítése nagybetűs formában
+  style={{
+    padding: "8px",
+    borderRadius: "8px",
+    fontSize: "16px",
+    marginBottom: "10px",
+    width: "40%",
+    minWidth: "300px", // Minimum szélesség
+  }}
+/>
   {renderAircraft(
-    [...apron].sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
+    [...apron]
+      .filter((reg) => reg.includes(searchTerm)) // Szűrés a keresési feltétel alapján
+      .sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
     [
-      { label: "Taxi", onClick: moveToTaxiFromApron },
-      { label: "Holding Point", onClick: moveToHoldingPointFromApron }, // Új gomb hozzáadása
+      { label: "Holding Point", onClick: moveToHoldingPointFromApron },
+	  { label: "Taxi", onClick: moveToTaxiFromApron },
+      { label: "Cross Country", onClick: moveToCrossCountryFromApron } // Új gomb hozzáadása
     ]
   )}
   <div className="flex gap-2" style={{ marginTop: "10px" }}>
@@ -579,7 +625,7 @@ const renderAircraft = (
             color: "white"
           }}>
             <h3 style={{ fontSize: "20px", marginBottom: "16px" }}>Choose TB for {selectedAircraft}:</h3>
-            {["1", "2", "3", "4", "5", "6","7", "5-6","1-2","2-3","1-2-3", "100",].map((box) => (
+            {["1", "2", "3", "4", "5", "6","7", "5-6","1-2","2-3","1-2-3", "100","PROCEEDING TO VC"].map((box) => (
               <button
                 key={box}
                 onClick={() => handleTrainingBoxSelection(box)}
