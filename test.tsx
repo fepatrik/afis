@@ -522,6 +522,7 @@ const renderAircraft = (
   {renderAircraft(localIR, [
     { label: "Join VC", onClick: moveToVisualCircuitFromLocalIR },
     { label: "Training Box", onClick: openModal }, // Új gomb hozzáadása
+	{ label: "Cross Country", onClick: moveToCrossCountry }, // Új gomb hozzáadása
 	{ label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }
   ])}
 </Section>
