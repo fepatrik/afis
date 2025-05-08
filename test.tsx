@@ -18,6 +18,8 @@ const AfisProgram = () => {
   const [timestamps, setTimestamps] = useState<{ [key: string]: { takeoff?: string; landed?: string } }>({});
 const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
 const [searchTerm, setSearchTerm] = useState<string>(""); // Keresési kifejezés
+const [boxWidth, setBoxWidth] = useState(180); // Alapértelmezett szélesség 180px
+
 
 const styles = {
   container: {
@@ -29,7 +31,7 @@ const styles = {
   } as React.CSSProperties,
   aircraftCard: {
     flexBasis: `${22 * scale}%`,
-    maxWidth: `${180 * scale}px`,
+      maxWidth: `${boxWidth}px`, // Dinamikus szélesség
     minHeight: `${20 * scale}px`,
     border: `${3 * scale}px solid white`,
     borderRadius: `${15 * scale}px`,
@@ -451,6 +453,7 @@ const renderAircraft = (
 
 
 <Section title="LHNY AFIS - by Ludwig Schwarz Software Company">
+    <h2>Méret:</h2>
   <input
     type="range"
     style={{ width: '600px' }} // Fix szélesség, nem hat a skála
@@ -460,15 +463,19 @@ const renderAircraft = (
     value={scale}
     onChange={(e) => setScale(parseFloat(e.target.value))} // A skálaérték frissítése
   />
-  <div
-    style={{
-      marginTop: '20px', // Fix margin, nem változik a skálával
-      padding: '10px', // Fix padding, nem változik a skálával
-      fontSize: '16px', // Fix betűméret, nem változik a skálával
-    }}
-  >
-    Adjust scaling with the slider. Click on active training box to switch selected training box. Data is lost after refreshing the page!
-  </div>
+
+  <h2>Szélesség:</h2>
+   <input
+    type="range"
+    style={{ width: '600px' }}
+    min="150" // Minimum érték 100px
+    max="300" // Maximum érték 300px
+    step="1" // Lépésköz 1px
+    value={boxWidth}
+    onChange={(e) => setBoxWidth(parseInt(e.target.value))} // boxWidth frissítése
+  />
+      <p>Adjust sizes with the slider. Click on active training box to switch selected training box. Data is lost after refreshing the page!</p>
+
 </Section>
 
 
