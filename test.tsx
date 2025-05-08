@@ -17,6 +17,7 @@ const AfisProgram = () => {
   const [crossCountryFrequency, setCrossCountryFrequency] = useState<{ [key: string]: boolean }>({});
   const [timestamps, setTimestamps] = useState<{ [key: string]: { takeoff?: string; landed?: string } }>({});
 const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
+const [searchTerm, setSearchTerm] = useState<string>(""); // Keresési kifejezés
 
 const styles = {
   container: {
@@ -50,6 +51,13 @@ const styles = {
 const getCurrentTime = () => {
   const now = new Date();
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+};
+
+
+
+const moveToCrossCountryFromApron = (reg: string) => {
+  setApron((prev) => prev.filter((r) => r !== reg)); // Eltávolítja a gépet az Apron állapotból
+  setCrossCountry((prev) => [...prev, reg]);        // Hozzáadja a gépet a Cross Country állapothoz
 };
 
 const moveToHoldingPointFromApron = (reg: string) => {
@@ -191,6 +199,15 @@ const moveToCrossCountry = (reg: string) => {
   setCrossCountryFrequency((prev) => ({ ...prev, [reg]: true })); // << EZ AZ ÚJ SOR
 };
 
+const moveToLocalIRFromCrossCountry = (reg: string) => {
+  setCrossCountry((prev) => prev.filter((r) => r !== reg)); // Eltávolítja a Cross Country állapotból
+  setLocalIR((prev) => [...prev, reg]); // Hozzáadja a Local IR állapothoz
+  setLocalIRDetails((prev) => ({
+    ...prev,
+    [reg]: { procedure: "---", height: "", clearance: "" }, // Alapértelmezett értékek a Local IR-hez
+  }));
+};
+
   const moveToVisualFromTrainingBox = (reg: string) => {
     setTrainingBox((prev) => {
       const copy = { ...prev };
@@ -321,7 +338,7 @@ const renderAircraft = (
                 onChange={(e) => handleLocalIRChange(reg, 'procedure', e.target.value)}
                 style={{ marginBottom: `${8 * scale}px`, padding: `${6 * scale}px`, borderRadius: `${6 * scale}px` }}
               >
-                {["---", "NDB Traffic Pattern", "Holding NYR", "Holding PQ", "RNP Z", "RNP Y", "RNP Y Circle to Land", "RNP Z Circle to Land", "VOR APP", "VOR TEMPO APP", "NDB TEMPO APP", "NDB APP","BOR APP","NCS NDB APP"].map(option => (
+                {["---", "NDB Traffic Pattern", "Holding NYR", "Holding PQ", "RNP Z", "RNP Y", "RNP Y Circle to Land", "RNP Z Circle to Land", "VOR APP", "NDB APP"].map(option => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
@@ -449,7 +466,10 @@ const renderAircraft = (
 <Section title="Cross Country">
   {renderAircraft(
     crossCountry,
-    [{ label: "Joining Visual Circuit", onClick: moveToVisualFromCrossCountry }],
+    [
+      { label: "Joining Visual Circuit", onClick: moveToVisualFromCrossCountry },
+      { label: "Local IR", onClick: moveToLocalIRFromCrossCountry }, // Új gomb hozzáadása
+    ],
     false,
     (reg) => (
       <textarea
@@ -457,7 +477,7 @@ const renderAircraft = (
         placeholder="Proceeding to..."
       />
     ),
-    true // << EZ AZ ÚJ FLAG: isCrossCountry
+    true // Flag indicating Cross Country state
   )}
 </Section>
 
@@ -466,7 +486,8 @@ const renderAircraft = (
 <Section title="Local IR">
   {renderAircraft(localIR, [
     { label: "Join VC", onClick: moveToVisualCircuitFromLocalIR },
-    { label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }, // Add the new button here
+    { label: "Training Box", onClick: openModal }, // Új gomb hozzáadása
+	{ label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }
   ])}
 </Section>
   </div>
@@ -486,10 +507,10 @@ const renderAircraft = (
 
       <Section title={`Visual Circuit (${visualCircuit.length})`}>
         {renderAircraft(visualCircuit, [
-          { label: "Runway Vacated", onClick: moveToTaxiingFromVisual },
           { label: "Training Box", onClick: openModal },
           { label: "Local IR", onClick: moveToLocalIR },
-          { label: "Cross Country", onClick: moveToCrossCountry }
+          { label: "Cross Country", onClick: moveToCrossCountry },
+		  { label: "Runway Vacated", onClick: moveToTaxiingFromVisual }
         ])}
       </Section>
 
@@ -518,7 +539,8 @@ const renderAircraft = (
     [...apron].sort((a, b) => a.localeCompare(b)), // Sort the array alphabetically
     [
       { label: "Taxi", onClick: moveToTaxiFromApron },
-      { label: "Holding Point", onClick: moveToHoldingPointFromApron }, // Új gomb hozzáadása
+      { label: "Holding Point", onClick: moveToHoldingPointFromApron },
+      { label: "Cross Country", onClick: moveToCrossCountryFromApron }, // Új gomb hozzáadása
     ]
   )}
   <div className="flex gap-2" style={{ marginTop: "10px" }}>
