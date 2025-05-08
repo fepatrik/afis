@@ -141,6 +141,11 @@ const moveToTaxiingFromVisual = (reg: string) => {
   }));
 };
 
+const resetSizes = () => {
+  setScale(1);     // Alapértelmezett skála
+  setBoxWidth(180); // Alapértelmezett szélesség
+};
+
   const moveToVisualCircuitFromLocalIR = (reg: string) => {
     setLocalIR(localIR.filter((r) => r !== reg));
     setVisualCircuit([...visualCircuit, reg]);
@@ -453,7 +458,7 @@ const renderAircraft = (
 
 
 <Section title="LHNY AFIS - by Ludwig Schwarz Software Company">
-    <h2>Méret:</h2>
+    <h2>Size:</h2>
   <input
     type="range"
     style={{ width: '600px' }} // Fix szélesség, nem hat a skála
@@ -464,7 +469,7 @@ const renderAircraft = (
     onChange={(e) => setScale(parseFloat(e.target.value))} // A skálaérték frissítése
   />
 
-  <h2>Szélesség:</h2>
+  <h2>Width:</h2>
    <input
     type="range"
     style={{ width: '600px' }}
@@ -475,7 +480,21 @@ const renderAircraft = (
     onChange={(e) => setBoxWidth(parseInt(e.target.value))} // boxWidth frissítése
   />
       <p>Adjust sizes with the slider. Click on active training box to switch selected training box. Data is lost after refreshing the page!</p>
-
+<button
+  style={{
+    marginTop: '10px',
+    padding: '10px 20px',
+    fontSize: '16px',
+    backgroundColor: '#007BFF',
+    color: 'white',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer'
+  }}
+  onClick={resetSizes}
+>
+  Reset size to default
+</button>
 </Section>
 
 
@@ -523,8 +542,9 @@ const renderAircraft = (
 
       <Section title={`Visual Circuit (${visualCircuit.length})`}>
         {renderAircraft(visualCircuit, [
-          { label: "Training Box", onClick: openModal },
-          { label: "Local IR", onClick: moveToLocalIR },
+         { label: "Local IR", onClick: moveToLocalIR },         
+		 { label: "Training Box", onClick: openModal },
+
           { label: "Cross Country", onClick: moveToCrossCountry },
 		  { label: "Runway Vacated", onClick: moveToTaxiingFromVisual }
         ])}
@@ -579,7 +599,7 @@ const renderAircraft = (
       type="text"
       value={newReg}
       onChange={(e) => setNewReg(e.target.value.toUpperCase())} // Kisbetűk nagybetűvé alakítása
-      placeholder="Új lajstrom"
+      placeholder="New registration"
       style={{
         padding: "8px",
         borderRadius: "8px",
@@ -600,7 +620,7 @@ const renderAircraft = (
         border: "none",
       }}
     >
-      Hozzáadás
+      Add aircraft to apron
     </button>
   </div>
 </Section>
