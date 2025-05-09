@@ -22,13 +22,18 @@ const [boxWidth, setBoxWidth] = useState(180); // Alapértelmezett szélesség 1
 
 // Add a new state to handle the aircraft statuses
 const [aircraftStatuses, setAircraftStatuses] = useState<{ [key: string]: 'DUAL' | 'SOLO' }>({});
+const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
 
 // Function to toggle the status of an aircraft
 const toggleAircraftStatus = (reg: string) => {
-  setAircraftStatuses((prevStatuses) => ({
-    ...prevStatuses,
-    [reg]: prevStatuses[reg] === 'DUAL' ? 'SOLO' : 'DUAL',
-  }));
+  setAircraftStatuses((prevStatuses) => {
+    const currentStatus = prevStatuses[reg] || 'DUAL';
+    const newStatus = currentStatus === 'DUAL' ? 'SOLO' : 'DUAL';
+    return {
+      ...prevStatuses,
+      [reg]: newStatus,
+    };
+  });
 };
 
 
@@ -364,11 +369,14 @@ const renderAircraft = (
                   type="checkbox"
                   checked={onFreq}
                   onChange={() =>
-                    setCrossCountryFrequency((prev) => ({
-                      ...prev,
-                      [reg]: !prev[reg]
-                    }))
-                  }
+  setCrossCountryFrequency((prev) => {
+    const currentStatus = prev[reg] ?? true; // Alapértelmezés: true
+    return {
+      ...prev,
+      [reg]: !currentStatus, // Állapot váltása
+    };
+  })
+}
                   style={{ marginLeft: `${8 * scale}px`, transform: `scale(${1.5 * scale})` }}
                 />
               </label>
@@ -512,21 +520,36 @@ const renderAircraft = (
     onChange={(e) => setBoxWidth(parseInt(e.target.value))} // boxWidth frissítése
   />
       <p>Adjust sizes with the slider. Click on active training box to switch selected training box. Data is lost after refreshing the page!</p>
-<button
-  style={{
-    marginTop: '10px',
-    padding: '10px 20px',
-    fontSize: '16px',
-    backgroundColor: '#007BFF',
-    color: 'white',
-    borderRadius: '8px',
-    border: 'none',
-    cursor: 'pointer'
-  }}
-  onClick={resetSizes}
->
-  Reset size to default
-</button>
+<div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+  <button
+    style={{
+      padding: "10px 20px",
+      fontSize: "16px",
+      backgroundColor: "#007BFF",
+      color: "white",
+      borderRadius: "8px",
+      border: "none",
+      cursor: "pointer",
+    }}
+    onClick={resetSizes}
+  >
+    Reset size to default
+  </button>
+  <button
+    style={{
+      padding: "10px 20px",
+      fontSize: "16px",
+      backgroundColor: "#28a745",
+      color: "white",
+      borderRadius: "8px",
+      border: "none",
+      cursor: "pointer",
+    }}
+    onClick={() => setIsHelpModalOpen(true)}
+  >
+    Help
+  </button>
+</div>
 </Section>
 
 
@@ -553,9 +576,9 @@ const renderAircraft = (
 <Section title="Local IR">
   {renderAircraft(localIR, [
     { label: "Join VC", onClick: moveToVisualCircuitFromLocalIR },
-    { label: "Training Box", onClick: openModal }, // Új gomb hozzáadása
-	{ label: "Cross Country", onClick: moveToCrossCountry }, // Új gomb hozzáadása
-	{ label: "Runway Vacated", onClick: moveToTaxiingFromLocalIR }
+    { label: "TB", onClick: openModal }, // Új gomb hozzáadása
+	{ label: "XC", onClick: moveToCrossCountry }, // Új gomb hozzáadása
+	{ label: "Vacated", onClick: moveToTaxiingFromLocalIR }
   ])}
 </Section>
   </div>
@@ -578,9 +601,9 @@ const renderAircraft = (
     { label: "← Left", onClick: moveLeft }, // Balra mozgató nyíl
     { label: "Right →", onClick: moveRight }, // Jobbra mozgató nyíl
     { label: "Local IR", onClick: moveToLocalIR },
-    { label: "Training Box", onClick: openModal },
-    { label: "Cross Country", onClick: moveToCrossCountry },
-    { label: "Runway Vacated", onClick: moveToTaxiingFromVisual }
+    { label: "TB", onClick: openModal },
+    { label: "XC", onClick: moveToCrossCountry },
+    { label: "Vacated", onClick: moveToTaxiingFromVisual }
   ])}
 </Section>
 
@@ -661,7 +684,53 @@ const renderAircraft = (
 	  
 	  
 	  
-	  
+	  {isHelpModalOpen && (
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+  }}>
+    <div style={{
+      backgroundColor: "#222",
+      padding: "20px",
+      borderRadius: "12px",
+      textAlign: "center",
+      minWidth: "320px",
+      color: "white"
+    }}>
+      <h3 style={{ fontSize: "20px", marginBottom: "16px" }}>Help</h3>
+      
+<p style={{ fontSize: "16px", marginBottom: "16px" }}> In the <strong>Apron</strong> section, you'll find all Tréner airplanes. You can add foreign aircraft at the bottom, such as a police helicopter (R902). Click the <strong>APRON</strong> or <strong>HOLDING POINT</strong> button to move the aircraft to the corresponding group. Can't find the plane? Use the search bar. </p>
+<p style={{ fontSize: "16px", marginBottom: "16px" }}> When selecting <strong>VISUAL CIRCUIT</strong>, the aircraft is moved automatically, and its take-off time is recorded. In the Visual Circuit section, you can rearrange aircraft by moving them left or right to set the correct sequence. Click the <strong>DUAL</strong> button to switch the plane to <strong>SOLO</strong> mode, indicating it is a solo student. </p>
+<p style={{ fontSize: "16px", marginBottom: "16px" }}> From the Visual Circuit, aircraft can proceed to <strong>Local IR</strong>, <strong>Training Box (TB)</strong>, or <strong>Cross Country (XC)</strong>. </p> <p style={{ fontSize: "16px", marginBottom: "16px" }}> In the <strong>Local IR</strong> section, you can choose the task from the first drop-down menu. You can also add additional remarks—such as altitude, task details, or position—in the text input field. </p>
+<p style={{ fontSize: "16px", marginBottom: "16px" }}> When selecting <strong>Training Box (TB)</strong>, a pop-up window will appear where you can select the appropriate TB. If the aircraft changes TB, simply click the displayed TB (e.g., "TB 6") to update it. There’s also an option to select <strong>TB Proceeding to Visual Circuit</strong>, indicating that the aircraft is returning. To actually move the plane back, click the <strong>JOIN VC</strong> button. Selecting “TB Proceeding to Visual Circuit” is optional—it’s just for situational awareness, not required for moving the aircraft. </p>
+<p style={{ fontSize: "16px", marginBottom: "16px" }}> In the <strong>Cross Country</strong> section, you can leave a remark indicating where the aircraft is headed. The checkbox allows you to mark whether the aircraft is on frequency. </p>
+      <button
+        onClick={() => setIsHelpModalOpen(false)}
+        style={{
+          marginTop: "14px",
+          padding: "10px 20px",
+          fontSize: "16px",
+          backgroundColor: "#dc3545",
+          color: "white",
+          borderRadius: "8px",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
 
       {isModalOpen && (
         <div style={{
