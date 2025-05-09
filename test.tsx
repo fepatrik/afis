@@ -20,6 +20,17 @@ const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
 const [searchTerm, setSearchTerm] = useState<string>(""); // Keresési kifejezés
 const [boxWidth, setBoxWidth] = useState(180); // Alapértelmezett szélesség 180px
 
+// Add a new state to handle the aircraft statuses
+const [aircraftStatuses, setAircraftStatuses] = useState<{ [key: string]: 'DUAL' | 'SOLO' }>({});
+
+// Function to toggle the status of an aircraft
+const toggleAircraftStatus = (reg: string) => {
+  setAircraftStatuses((prevStatuses) => ({
+    ...prevStatuses,
+    [reg]: prevStatuses[reg] === 'DUAL' ? 'SOLO' : 'DUAL',
+  }));
+};
+
 
 const styles = {
   container: {
@@ -290,19 +301,22 @@ const renderAircraft = (
 
 
 
-  <div className="container" style={styles.container}>
+    <div className="container" style={styles.container}>
     {regs.map((reg, index) => {
-      const onFreq = crossCountryFrequency[reg] ?? true; // default true
-      const isInLocalIR = localIR.includes(reg);
-      const isInTrainingBox = trainingBox[reg];
-      const isInVisualCircuit = visualCircuit.includes(reg);
-      const borderColor = isCrossCountry
-        ? onFreq
-          ? 'limegreen'
-          : 'red'
-        : isInLocalIR || isInTrainingBox || isInVisualCircuit
-        ? 'limegreen' // green border for local IR, training box, or visual circuit
-        : 'white'; // default to white border
+      // Determine the "On Frequency" status and default if not set
+      const onFreq = crossCountryFrequency[reg] ?? true; // Default to true
+
+      // Determine the DUAL/SOLO status and default to DUAL
+      const isDual = aircraftStatuses[reg] === 'DUAL' || !aircraftStatuses[reg];
+
+      // Set the border color based on the state
+      let borderColor;
+      if (isCrossCountry) {
+        borderColor = onFreq ? 'limegreen' : 'red'; // Green if "On Frequency" is checked, red otherwise
+      } else {
+        borderColor = isDual ? 'limegreen' : 'blue'; // Green for DUAL, Blue for SOLO in other cases
+      }
+
 
       return (
         <div
@@ -312,12 +326,34 @@ const renderAircraft = (
             ...styles.aircraftCard,
             border: `3px solid ${borderColor}`,
             animation: pulsing ? "pulse 2s infinite" : undefined,
-            opacity: isCrossCountry && !onFreq ? 0.5 : 1, // halvány ha nincs frekin
-            fontSize: `${18 * scale}px`, // Betűméret szorzása a scale értékével
+            opacity: isCrossCountry && !onFreq ? 0.5 : 1, // Reduce opacity if not "On Frequency"
           }}
         >
-          <div style={{ fontWeight: "bold", fontSize: `${20 * scale}px`, marginBottom: `${10 * scale}px` }}>
-            {index + 1}. {reg}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: `${10 * scale}px` }}>
+            <div style={{
+              fontWeight: "bold",
+              fontSize: `${20 * scale}px`,
+              flex: 1, // Kitöltés a gombig
+              textAlign: "center", // Középre igazított szöveg
+            }}>
+              {index + 1}. {reg}
+            </div>
+            <button
+              onClick={() => toggleAircraftStatus(reg)}
+              style={{
+                padding: `${4 * scale}px`, // Kisebb padding
+                backgroundColor: isDual ? 'limegreen' : 'blue',
+                color: 'white',
+                borderRadius: '4px', // Kisebb border-radius
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: `${12 * scale}px`, // Kisebb betűméret
+                marginLeft: `${10 * scale}px`, // Távolság a lajstromtól
+              }}
+            >
+              {isDual ? 'DUAL' : 'SOLO'}
+            </button>
           </div>
 
           {isCrossCountry && (
@@ -537,15 +573,16 @@ const renderAircraft = (
   </div>
 </div>
 
-      <Section title={`Visual Circuit (${visualCircuit.length})`}>
-        {renderAircraft(visualCircuit, [
-         { label: "Local IR", onClick: moveToLocalIR },         
-		 { label: "Training Box", onClick: openModal },
-
-          { label: "Cross Country", onClick: moveToCrossCountry },
-		  { label: "Runway Vacated", onClick: moveToTaxiingFromVisual }
-        ])}
-      </Section>
+<Section title={`Visual Circuit (${visualCircuit.length})`}>
+  {renderAircraft(visualCircuit, [
+    { label: "← Left", onClick: moveLeft }, // Balra mozgató nyíl
+    { label: "Right →", onClick: moveRight }, // Jobbra mozgató nyíl
+    { label: "Local IR", onClick: moveToLocalIR },
+    { label: "Training Box", onClick: openModal },
+    { label: "Cross Country", onClick: moveToCrossCountry },
+    { label: "Runway Vacated", onClick: moveToTaxiingFromVisual }
+  ])}
+</Section>
 
 <div style={{ display: "flex", width: "100%", marginBottom: "15px" }}>
   <div style={{ flex: 1, marginRight: "10px" }}>
