@@ -287,6 +287,9 @@ const renderAircraft = (
   extraContent?: (reg: string, index?: number) => React.ReactNode,
   isCrossCountry: boolean = false
 ) => (
+
+
+
   <div className="container" style={styles.container}>
     {regs.map((reg, index) => {
       const onFreq = crossCountryFrequency[reg] ?? true; // default true
@@ -363,13 +366,6 @@ const renderAircraft = (
                 onChange={(e) => handleLocalIRChange(reg, 'height', e.target.value)}
                 placeholder="Height"
                 style={{ padding: `${6 * scale}px`, borderRadius: `${6 * scale}px`, color: 'black', marginBottom: `${8 * scale}px` }}
-              />
-              <input
-                type="text"
-                value={localIRDetails[reg]?.clearance || ""}
-                onChange={(e) => handleLocalIRChange(reg, 'clearance', e.target.value)}
-                placeholder="Remark"
-                style={{ padding: `${6 * scale}px`, borderRadius: `${6 * scale}px`, color: 'black' }}
               />
             </>
           )}
@@ -516,7 +512,7 @@ const renderAircraft = (
   )}
 </Section>
 
-<div style={{ display: "flex", width: "100%", marginBottom: "25px" }}>
+<div style={{ display: "flex", width: "100%", marginBottom: "15px" }}>
   <div style={{ flex: 1, marginRight: "10px" }}>
 <Section title="Local IR">
   {renderAircraft(localIR, [
@@ -551,7 +547,7 @@ const renderAircraft = (
         ])}
       </Section>
 
-<div style={{ display: "flex", width: "100%", marginBottom: "25px" }}>
+<div style={{ display: "flex", width: "100%", marginBottom: "15px" }}>
   <div style={{ flex: 1, marginRight: "10px" }}>
     <Section title="Holding Point">
       {renderAircraft(holdingPoint, [
@@ -678,7 +674,7 @@ const renderAircraft = (
 };
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", borderRadius: "12px", padding: "15px", marginBottom: "25px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", color: "white" }}>
+  <div style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", borderRadius: "12px", padding: "15px", marginBottom: "15px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", color: "white" }}>
     <h2 style={{ fontSize: "22px", fontWeight: "bold", marginBottom: "10px" }}>{title}</h2>
     {children}
   </div>
