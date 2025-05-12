@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 
 const AfisProgram = () => {
+const [showTable, setShowTable] = useState(true);
   const [taxiing, setTaxiing] = useState<string[]>([]);
   const [holdingPoint, setHoldingPoint] = useState<string[]>([]);
   const [visualCircuit, setVisualCircuit] = useState<string[]>([]);
@@ -19,6 +20,14 @@ const AfisProgram = () => {
 const [scale, setScale] = useState(1); // Új állapot a csúszka értékéhez
 const [searchTerm, setSearchTerm] = useState<string>(""); // Keresési kifejezés
 const [boxWidth, setBoxWidth] = useState(180); // Alapértelmezett szélesség 180px
+  const [flightLog, setFlightLog] = useState<{ reg: string; takeoff: string | ""; landed: string | "" }[]>([]);
+
+  const addFlightLog = (reg: string, takeoff: string | "", landed: string | "") => {
+    setFlightLog((prevLog) => [
+      ...prevLog,
+      { reg, takeoff, landed },
+    ]);
+  };
 
 const [aircraftTGStatus, setAircraftTGStatus] = useState<{ [key: string]: 'T/G' | 'F/S' }>({});
 const toggleTGFSStatus = (reg: string) => {
@@ -135,16 +144,19 @@ const moveBackToTaxiing = (reg: string) => {
 };
 
   const moveToVisualFromHolding = (reg: string) => {
-  setHoldingPoint((prev) => prev.filter((r) => r !== reg));
-  setVisualCircuit((prev) => [...prev, reg]);
-  setTimestamps((prev) => ({
-    ...prev,
-    [reg]: {
-      ...prev[reg],
-      takeoff: getCurrentTime()
-    }
-  }));
-};
+    setHoldingPoint((prev) => prev.filter((r) => r !== reg));
+    setVisualCircuit((prev) => [...prev, reg]);
+    const takeoffTime = getCurrentTime();
+    setTimestamps((prev) => ({
+      ...prev,
+      [reg]: {
+        ...prev[reg],
+        takeoff: takeoffTime,
+      },
+    }));
+    // Add to flight log
+    addFlightLog(reg, takeoffTime, "");
+  };
 
 const moveToTaxiingFromLocalIR = (reg: string) => {
   setLocalIR(localIR.filter((r) => r !== reg));
@@ -158,17 +170,34 @@ const moveToTaxiingFromLocalIR = (reg: string) => {
   }));
 };
 
-const moveToTaxiingFromVisual = (reg: string) => {
-  setVisualCircuit((prev) => prev.filter((r) => r !== reg));
-  setTaxiing((prev) => [...prev, reg]);
-  setTimestamps((prev) => ({
-    ...prev,
-    [reg]: {
-      ...prev[reg],
-      landed: getCurrentTime()
-    }
-  }));
-};
+
+  const moveToTaxiingFromVisual = (reg: string) => {
+    setVisualCircuit((prev) => prev.filter((r) => r !== reg));
+    setTaxiing((prev) => [...prev, reg]);
+    const landedTime = getCurrentTime();
+    setTimestamps((prev) => ({
+      ...prev,
+      [reg]: {
+        ...prev[reg],
+        landed: landedTime,
+      },
+    }));
+    // Update the flight log with landing time
+    setFlightLog((prevLog) =>
+      prevLog.map((entry) =>
+        entry.reg === reg ? { ...entry, landed: landedTime } : entry
+      )
+    );
+    // Reset to default states
+    setAircraftStatuses((prev) => ({
+      ...prev,
+      [reg]: 'DUAL',
+    }));
+    setAircraftTGStatus((prev) => ({
+      ...prev,
+      [reg]: 'T/G',
+    }));
+  };
 
 const resetSizes = () => {
   setScale(1);     // Alapértelmezett skála
@@ -715,6 +744,127 @@ const renderAircraft = (
       Add aircraft to apron
     </button>
   </div>
+</Section>
+
+<Section title="Flight Log">
+  <div style={{ marginBottom: "10px" }}>
+    <button
+      onClick={() => setShowTable((prev) => !prev)}
+      style={{
+        padding: "10px 20px",
+        fontSize: "16px",
+        backgroundColor: "#007BFF",
+        color: "white",
+        borderRadius: "8px",
+        border: "none",
+        cursor: "pointer",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
+    >
+      {showTable ? "Hide Table" : "Show Table"}
+    </button>
+  </div>
+
+{showTable && (
+  flightLog
+    .slice() // Másolat készítése a tömbről
+    .sort((a, b) => {
+      const timeA = a.takeoff === "N/A" ? Infinity : new Date(`1970-01-01T${a.takeoff}:00`).getTime();
+      const timeB = b.takeoff === "N/A" ? Infinity : new Date(`1970-01-01T${b.takeoff}:00`).getTime();
+      return timeA - timeB;
+    })
+    .reduce((groups, item, index) => {
+      const groupIndex = Math.floor(index / 33); // 33 elem egy csoportban
+      if (!groups[groupIndex]) groups[groupIndex] = [];
+      groups[groupIndex].push(item);
+      return groups;
+    }, [] as { reg: string; takeoff: string | ""; landed: string | ""; squawk?: string; crew?: string }[][]) // Egy tömb a csoportokhoz
+    .map((group, groupIndex) => (
+      <table
+        key={groupIndex}
+        style={{
+          width: "800px",
+          borderCollapse: "collapse",
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          color: "white",
+          marginLeft: "0",
+          marginTop: groupIndex > 0 ? "20px" : "0", // Távolság a táblázatok között
+        }}
+      >
+        <thead>
+          <tr style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+            <th style={{ padding: "10px", border: "1px solid white" }}>#</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Registration</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>SQUAWK</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Takeoff Time</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>CREW</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Landing Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {group.map(({ reg, takeoff, landed, squawk = "", crew = "" }, index) => (
+            <tr
+              key={index}
+              style={{
+                backgroundColor: index % 2 === 0 ? "rgba(0, 0, 0, 0.7)" : "rgba(50, 50, 50, 0.7)",
+              }}
+            >
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{index + 1 + groupIndex * 33}</td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{reg}</td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>
+                <input
+                  type="text"
+                  value={squawk}
+                  maxLength={4}
+                  pattern="\d{4}"
+                  onChange={(e) =>
+                    setFlightLog((prevLog) =>
+                      prevLog.map((entry) =>
+                        entry.reg === reg ? { ...entry, squawk: e.target.value } : entry
+                      )
+                    )
+                  }
+                  style={{
+                    width: "60px",
+                    padding: "4px",
+                    textAlign: "center",
+                    borderRadius: "4px",
+                    border: "1px solid white",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    color: "white",
+                  }}
+                />
+              </td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{takeoff}</td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>
+                <input
+                  type="text"
+                  value={crew}
+                  onChange={(e) =>
+                    setFlightLog((prevLog) =>
+                      prevLog.map((entry) =>
+                        entry.reg === reg ? { ...entry, crew: e.target.value } : entry
+                      )
+                    )
+                  }
+                  style={{
+                    width: "100px",
+                    padding: "4px",
+                    textAlign: "center",
+                    borderRadius: "4px",
+                    border: "1px solid white",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    color: "white",
+                  }}
+                />
+              </td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{landed}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ))
+)}
 </Section>
 	  
 	  
