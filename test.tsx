@@ -818,69 +818,89 @@ const renderAircraft = (
   });
 
   return tables.map((tableRows, tableIndex) => (
-    <table
+    <div
       key={tableIndex}
       style={{
-        width: "100%",
-        borderCollapse: "collapse",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        color: "white",
-        marginBottom: "20px", // Távolság a táblázatok között
+        width: "40%", // Táblázat szélessége 40%
+        margin: "20px 0", // Külső margók (felső/alsó 20px, nincs jobb/bal margó)
+        overflowX: "auto", // Görgetés, ha a tartalom túl széles
+        textAlign: "left", // Balra igazítás
       }}
     >
-      <thead>
-        <tr style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <th style={{ padding: "10px", border: "1px solid white" }}>#</th>
-          <th style={{ padding: "10px", border: "1px solid white" }}>Registration</th>
-          <th style={{ padding: "10px", border: "1px solid white" }}>Takeoff Time</th>
-          <th style={{ padding: "10px", border: "1px solid white" }}>Squawk</th>
-          <th style={{ padding: "10px", border: "1px solid white" }}>Crew</th>
-          <th style={{ padding: "10px", border: "1px solid white" }}>Landing Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        {tableRows.map(({ serial, reg, takeoff, landed, squawk, crew }) => (
-          <tr
-            key={serial}
-            style={{
-              backgroundColor: serial % 2 === 0 ? "rgba(0, 0, 0, 0.7)" : "rgba(50, 50, 50, 0.7)",
-            }}
-          >
-            <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{serial}</td>
-            <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{reg}</td>
-            <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{takeoff}</td>
-            <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>
-              <input
-                type="text"
-                value={squawk}
-                maxLength={4}
-                onChange={(e) => handleSquawkChange(serial, e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "5px",
-                  borderRadius: "4px",
-                  textAlign: "center",
-                }}
-              />
-            </td>
-            <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>
-              <input
-                type="text"
-                value={crew}
-                onChange={(e) => handleCrewChange(serial, e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "5px",
-                  borderRadius: "4px",
-                  textAlign: "center",
-                }}
-              />
-            </td>
-            <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{landed}</td>
+      <table
+        style={{
+          width: "100%", // Táblázat teljes szélessége a konténerben
+          borderCollapse: "collapse",
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          color: "white",
+        }}
+      >
+        <thead>
+          <tr style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+            <th style={{ padding: "10px", border: "1px solid white" }}>#</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Registration</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Takeoff Time</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Squawk</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Crew</th>
+            <th style={{ padding: "10px", border: "1px solid white" }}>Landing Time</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {tableRows.map(({ serial, reg, takeoff, landed, squawk, crew }) => (
+            <tr
+              key={serial}
+              style={{
+                backgroundColor: serial % 2 === 0 ? "rgba(0, 0, 0, 0.7)" : "rgba(50, 50, 50, 0.7)",
+              }}
+            >
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{serial}</td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{reg}</td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{takeoff}</td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>
+                <input
+                  type="text"
+                  value={squawk}
+                  maxLength={4}
+                  onChange={(e) => handleSquawkChange(serial, e.target.value)}
+                  style={{
+                    width: "80%",
+                    padding: "8px",
+                    borderRadius: "6px",
+                    textAlign: "center",
+                    border: "1px solid #ccc",
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: "#fff",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                />
+              </td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>
+                <input
+                  type="text"
+                  value={crew}
+                  onChange={(e) => handleCrewChange(serial, e.target.value)}
+                  style={{
+                    width: "80%",
+                    padding: "8px",
+                    borderRadius: "6px",
+                    textAlign: "center",
+                    border: "1px solid #ccc",
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: "#fff",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                />
+              </td>
+              <td style={{ padding: "10px", border: "1px solid white", textAlign: "center" }}>{landed}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   ));
 })()}
       </Section>
